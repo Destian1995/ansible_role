@@ -1,5 +1,4 @@
----
 - hosts: localhost
-  remote_user: root
+  become: yes
   roles:
-    - postgree_exporter
+    - postgres_exporter
