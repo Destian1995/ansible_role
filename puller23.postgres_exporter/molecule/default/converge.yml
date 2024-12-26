@@ -1,0 +1,10 @@
+---
+- name: Converge
+  hosts: all
+  vars:
+    postgres_exporter_system_group: node_exp
+    postgres_exporter_system_user: node_exp
+  tasks:
+    - name: "Include puller23.postgres_exporter"
+      include_role:
+        name: "puller23.postgres_exporter"

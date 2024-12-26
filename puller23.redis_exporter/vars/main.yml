@@ -1,0 +1,14 @@
+---
+sys_architecture_map:
+  i386: '386'
+  x86_64: 'amd64'
+  aarch64: 'arm64'
+  armv7l: 'armv7'
+  armv6l: 'armv6'
+
+go_architecture: "{{ sys_architecture_map[ansible_architecture] | default(ansible_architecture) }}"
+
+_redis_exporter_binary_install_dir: "/usr/local/bin"
+_redis_exporter_install_dir: "{{ _redis_exporter_binary_install_dir }}/redis_exporter"
+_redis_exporter_system_group: "redis-exp"
+_redis_exporter_system_user: "{{ _redis_exporter_system_group }}"

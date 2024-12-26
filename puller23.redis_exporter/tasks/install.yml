@@ -1,0 +1,57 @@
+---
+- name: Create the redis_exporter group
+  group:
+    name: "{{ redis_exporter_system_group }}"
+    state: present
+    system: true
+  when: redis_exporter_system_group != "root"
+
+- name: Create the redis_exporter user
+  user:
+    name: "{{ redis_exporter_system_user }}"
+    groups: "{{ redis_exporter_system_group }}"
+    append: true
+    shell: /usr/sbin/nologin
+    create_home: false
+    home: /
+  when: redis_exporter_system_user != "root"
+
+- debug: 
+    msg: "{{ redis_exporter_base_url }}/v{{ redis_exporter_version }}/redis_exporter-v{{ redis_exporter_version }}.linux-{{ go_architecture }}.tar.gz"
+
+
+- block:
+    - name: Download redis_exporter
+      become: false
+      get_url:
+        url: "{{ redis_exporter_base_url }}/v{{ redis_exporter_version }}/redis_exporter-v{{ redis_exporter_version }}.linux-{{ go_architecture }}.tar.gz"
+        dest: "/tmp/redis_exporter-{{ redis_exporter_version }}.linux-{{ go_architecture }}.tar.gz"
+        checksum: "sha256:{{ redis_exporter_checksum }}"
+        mode: '0644'
+      register: _r_download_binary
+      until: _r_download_binary is succeeded
+      retries: 5
+      delay: 2
+      delegate_to: localhost
+
+    - name: Unarchive redis_exporter
+      become: false
+      unarchive:
+        src: "/tmp/redis_exporter-{{ redis_exporter_version }}.linux-{{ go_architecture }}.tar.gz"
+        #dest: "{{ _redis_exporter_install_dir }}"
+        dest: "/tmp"
+        creates: "/tmp/redis_exporter-v{{ redis_exporter_version }}.linux-{{ go_architecture }}/redis_exporter"
+      delegate_to: localhost
+    - debug:
+        msg: "/tmp/redis_exporter-v{{ redis_exporter_version }}.linux-{{ go_architecture }}/redis_exporter"
+
+    - name: Propagate redis_exporter
+      copy:
+        src: "/tmp/redis_exporter-v{{ redis_exporter_version }}.linux-{{ go_architecture }}/redis_exporter"
+        dest: "{{ _redis_exporter_install_dir }}"
+        mode: 0755
+        owner: root
+        group: root
+      # notify: restart redis_exporter
+      # when: not ansible_check_mode
+  when: redis_exporter_install_dir | length == 0

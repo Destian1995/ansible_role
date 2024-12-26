@@ -1,0 +1,17 @@
+---
+postgres_exporter_version: 0.9.0
+postgres_exporter_install_dir: ""
+
+postgres_exporter_config_dir: /opt/postgres_exporter
+postgres_exporter_env_file: postgres_exporter.env
+
+postgres_exporter_web_listen_adress: "0.0.0.0:9187"
+
+postgres_exporter_base_url: "https://github.com/prometheus-community/postgres_exporter/releases/download"
+
+postgres_exporter_db_ip: "localhost"
+postgres_exporter_db_port: 5432
+postgres_exporter_db_name: "postgres"
+postgres_exporter_db_user: "postgres"
+postgres_exporter_db_password: "password"
+postgres_exporter_web_telemetry_path: "metrics"

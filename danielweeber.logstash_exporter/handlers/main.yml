@@ -1,0 +1,5 @@
+---
+- name: restart logstash_exporter
+  service:
+    name: logstash_exporter
+    state: restarted

@@ -1,0 +1,15 @@
+---
+extends: default
+
+rules:
+  line-length:
+    max: 150
+    level: warning
+    allow-non-breakable-inline-mappings: true
+  truthy:
+    level: warning
+  document-start:
+    level: warning
+
+ignore: |
+  .github/stale.yml

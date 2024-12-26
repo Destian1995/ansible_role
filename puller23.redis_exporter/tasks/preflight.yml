@@ -1,0 +1,34 @@
+---
+- name: Assert the usage of systemd
+  assert:
+    that: ansible_service_mgr == 'systemd'
+    msg: "This role only works with systemd"
+
+- name: Check if redis_exporter is installed
+  stat:
+    path: "{{ _redis_exporter_install_dir }}"
+  register: _redis_exporter_is_installed
+  check_mode: false
+
+- name: Get currently installed redis_exporter version
+  command: "{{ _redis_exporter_install_dir }} --version"
+  args:
+    warn: false
+  changed_when: false
+  register: _r_redis_exporter_current_version
+  when: _redis_exporter_is_installed.stat.exists
+
+- block:
+    - name: Get checksum
+      set_fact:
+        _checksums: "{{ lookup('url', '{{ redis_exporter_base_url }}/v' + redis_exporter_version + '/sha256sums.txt', wantlist=True) | list }}"
+      run_once: true
+
+    - name: "Get checksum for {{ go_architecture }} architecture"
+      set_fact:
+        redis_exporter_checksum: "{{ item.split(' ')[0] }}"
+      with_items: "{{ _checksums }}"
+      when:
+        - "('linux-' + go_architecture + '.tar.gz') in item"
+  delegate_to: localhost
+  when: redis_exporter_install_dir | length == 0

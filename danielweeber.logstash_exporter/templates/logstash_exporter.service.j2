@@ -1,0 +1,10 @@
+[Unit]
+Description=LogstashExporter
+
+[Service]
+TimeoutStartSec=0
+User=logstash_exporter
+ExecStart={{ logstash_exporter_bin_path }} {{ logstash_exporter_options }}
+
+[Install]
+WantedBy=multi-user.target

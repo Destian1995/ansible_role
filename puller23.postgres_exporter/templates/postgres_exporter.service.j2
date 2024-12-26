@@ -1,0 +1,19 @@
+{{ ansible_managed | comment }}
+[Unit]
+Description=Prometheus exporter for Postgresql
+Wants=network-online.target
+After=network-online.target
+[Service]
+User={{ postgres_exporter_system_user }}
+Group={{ postgres_exporter_system_group }}
+WorkingDirectory={{ postgres_exporter_config_dir }}
+EnvironmentFile={{ postgres_exporter_config_dir }}/{{ postgres_exporter_env_file }}
+ExecStart={{ _postgres_exporter_binary }} \
+        --web.listen-address={{ postgres_exporter_web_listen_adress }} \
+        --web.telemetry-path=/{{ postgres_exporter_web_telemetry_path }}
+SyslogIdentifier=postgres_exporter
+ExecReload=/bin/kill -HUP $MAINPID
+KillSignal=SIGTERM
+Restart=always
+[Install]
+WantedBy=multi-user.target

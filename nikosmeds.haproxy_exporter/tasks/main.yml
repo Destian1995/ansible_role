@@ -1,0 +1,101 @@
+---
+- include: preflight.yml
+
+- name: install and start haproxy for development node(s)
+  become: true
+  block:
+    - name: install haproxy
+      apt:
+        name: haproxy
+        state: present
+    - name: start haproxy service
+      systemd: 
+        name: haproxy
+        state: started
+        enabled: true
+  when:
+    - haproxy_exporter_development_node
+
+- name: create haproxy_exporter group
+  become: true
+  group:
+    name: "{{ haproxy_exporter_system_group }}"
+    state: "{{ haproxy_exporter_state }}"
+    system: true
+
+- name: create haproxy_exporter user
+  become: true
+  user:
+    name: "{{ haproxy_exporter_system_user }}"
+    groups: "{{ haproxy_exporter_system_group }}"
+    append: true
+    createhome: false
+    shell: /usr/sbin/nologin
+    state: "{{ haproxy_exporter_state }}"
+    system: true
+
+- name: ensure tar is installed
+  package:
+    name: tar
+    state: present
+
+- name: download haproxy_exporter binary
+  become: true
+  get_url:
+    url: "https://github.com/prometheus/haproxy_exporter/releases/download/v{{ haproxy_exporter_version }}/haproxy_exporter-{{ haproxy_exporter_version }}.linux-{{ go_arch_map[ansible_architecture] | default(ansible_architecture) }}.tar.gz"
+    dest: "/tmp/haproxy_exporter-{{ haproxy_exporter_version }}.linux-{{ go_arch_map[ansible_architecture] | default(ansible_architecture) }}.tar.gz"
+    checksum: "sha256:{{ __haproxy_exporter_checksum }}"
+  register: _download_binary
+  until: _download_binary is succeeded
+  retries: 5
+  delay: 2
+
+- name: unarchive haproxy_exporter binary
+  unarchive:
+    src: "/tmp/haproxy_exporter-{{ haproxy_exporter_version }}.linux-{{ go_arch_map[ansible_architecture] | default(ansible_architecture) }}.tar.gz"
+    dest: /tmp
+    remote_src: true
+    creates: "{{ haproxy_exporter_bin_dir }}/haproxy_exporter-{{ haproxy_exporter_version }}.linux-{{ go_arch_map[ansible_architecture] | default(ansible_architecture) }}/haproxy_exporter"
+
+- name: propagate haproxy_exporter binary
+  become: true
+  copy:
+    src: "/tmp/haproxy_exporter-{{ haproxy_exporter_version }}.linux-{{ go_arch_map[ansible_architecture] | default(ansible_architecture) }}/haproxy_exporter"
+    dest: "{{ haproxy_exporter_bin_dir}}/haproxy_exporter"
+    remote_src: true
+    mode: 0750
+    owner: "{{ haproxy_exporter_system_user }}"
+    group: "{{ haproxy_exporter_system_group }}"
+  notify: restart haproxy_exporter
+
+- name: copy haproxy_exporter systemd service file
+  become: true
+  template:
+    src: haproxy_exporter.service.j2
+    dest: /etc/systemd/system/haproxy_exporter.service
+    owner: root
+    group: root
+    mode: 0644
+  no_log: true
+  notify: restart haproxy_exporter
+
+- name: start and enable haproxy_exporter service
+  become: true
+  systemd:
+    name: haproxy_exporter
+    enabled: "{{ haproxy_exporter_service_enabled }}"
+    state: "{{ haproxy_exporter_service_state }}"
+    daemon_reload: true
+
+- name: flush handlers prior to running tests
+  meta: flush_handlers
+
+- name: curl haproxy-exporter metrics
+  uri:
+    url: http://localhost:9101/metrics
+    return_content: yes
+  register: metrics
+
+- name: fail when haproxy-exporter unable to collect metrics
+  fail:
+  when: "'haproxy_up 1' not in metrics.content"

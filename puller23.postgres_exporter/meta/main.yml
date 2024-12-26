@@ -1,0 +1,24 @@
+---
+dependencies: []
+
+galaxy_info:
+  role_name: postgres_exporter
+  author: puller23
+  description: Install and configure prometheus postgres_exporter
+  license: "license (MIT)"
+  min_ansible_version: 2.4
+  platforms:
+    - name: EL
+      versions:
+        - 7
+    - name: Ubuntu
+      versions:
+        - bionic
+        - focal
+  galaxy_tags:
+    - monitoring
+    - prometheus
+    - exporter
+    - postgres
+    - metrics
+    - system

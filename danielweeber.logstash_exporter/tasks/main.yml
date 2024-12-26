@@ -1,0 +1,49 @@
+---
+- name: Check current logstash_exporter version.
+  command: "{{ logstash_exporter_bin_path }} --version"
+  failed_when: false
+  changed_when: false
+  register: logstash_exporter_version_check
+
+- name: Create logstash_exporter user.
+  user:
+    name: logstash_exporter
+    shell: /sbin/nologin
+    state: present
+
+- name: Download and unarchive logstash_exporter into temporary location.
+  get_url:
+    url: "{{ logstash_exporter_download_url }}"
+    dest: "{{ logstash_exporter_bin_path }}"
+    owner: logstash_exporter
+    mode: '0550'
+  when: >
+    logstash_exporter_version_check.stdout is not defined
+    or logstash_exporter_version not in logstash_exporter_version_check.stdout
+  register: logstash_exporter_download
+
+
+- name: Copy the logstash_exporter systemd unit file.
+  template:
+    src: logstash_exporter.service.j2
+    dest: /etc/systemd/system/logstash_exporter.service
+  register: logstash_exporter_service
+
+- name: Reload systemd daemon if unit file is changed.
+  systemd:
+    daemon_reload: true
+  notify: restart logstash_exporter
+  when: logstash_exporter_service is changed
+
+- name: Ensure logstash_exporter is running and enabled at boot.
+  service:
+    name: logstash_exporter
+    state: "{{ logstash_exporter_state }}"
+    enabled: "{{ logstash_exporter_enabled }}"
+
+- name: Verify logstash_exporter is responding to requests.
+  uri:
+    url: http://localhost:9304/metrics
+    return_content: true
+  register: metrics_output
+  failed_when: "'logstash_up' not in metrics_output.content"

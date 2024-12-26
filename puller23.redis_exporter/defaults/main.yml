@@ -1,0 +1,11 @@
+---
+redis_exporter_version: 1.20.0
+redis_exporter_install_dir: ""
+redis_exporter_web_listen_adress: "0.0.0.0:9312"
+
+redis_exporter_base_url: "https://github.com/oliver006/redis_exporter/releases/download"
+
+redis_exporter_redis_ip: localhost
+redis_exporter_redis_port: 6379
+redis_exporter_redis_password: ""
+redis_exporter_web_telemetry_path: metrics

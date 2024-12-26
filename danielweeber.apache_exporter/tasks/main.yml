@@ -1,0 +1,106 @@
+---
+- name: Install apache2
+  package:
+    name: apache2
+    state: present
+    update_cache: yes
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+
+- name: Check if apache2 is enabled
+  service:
+    name: apache2
+    state: started
+    enabled: true
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+
+- name: Install httpd
+  package:
+    name: httpd
+    state: present
+    update_cache: yes
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat'
+
+- name: Check if httpd is enabled
+  service:
+    name: httpd
+    state: started
+    enabled: true
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat'
+
+- name: Check current apache_exporter version.
+  command: "{{ apache_exporter_bin_path }} --version"
+  failed_when: false
+  changed_when: false
+  register: apache_exporter_version_check
+
+- name: Download and unarchive apache_exporter into temporary location.
+  unarchive:
+    src: "{{ apache_exporter_download_url }}"
+    dest: /tmp
+    remote_src: true
+  when: >
+    apache_exporter_version_check.stdout is not defined
+    or apache_exporter_version not in apache_exporter_version_check.stdout
+  register: apache_exporter_download_check
+
+- name: Move apache_exporter binary into place.
+  copy:
+    src: "/tmp/apache_exporter-{{ apache_exporter_version }}.linux-{{ apache_exporter_arch }}/apache_exporter"
+    dest: "{{ apache_exporter_bin_path }}"
+    mode: 0755
+    remote_src: true
+  notify: restart apache_exporter
+  when: apache_exporter_download_check is success
+
+- name: Move apache config into place
+  copy:
+    src: files/server-status.conf
+    dest: /etc/apache2/sites-enabled/
+    mode: 0755
+  notify: restart apache
+  when: >
+    apache_exporter_download_check is success and 
+    (ansible_distribution == 'Debian' or 
+    ansible_distribution == 'Ubuntu')
+
+- name: Move apache config into place
+  copy:
+    src: files/server-status.conf
+    dest: /etc/httpd/sites-enabled/
+    mode: 0755
+  notify: restart httpd
+  when: >
+    apache_exporter_download_check is success and 
+    (ansible_distribution == 'CentOS' or 
+    ansible_distribution == 'Red Hat')
+
+- name: Create apache_exporter user.
+  user:
+    name: apache_exporter
+    shell: /sbin/nologin
+    state: present
+
+- name: Copy the apache_exporter systemd unit file.
+  template:
+    src: apache_exporter.service.j2
+    dest: /etc/systemd/system/apache_exporter.service
+  register: apache_exporter_service
+
+- name: Reload systemd daemon if unit file is changed.
+  systemd:
+    daemon_reload: true
+  notify: restart apache_exporter
+  when: apache_exporter_service is changed
+
+- name: Ensure apache_exporter is running and enabled at boot.
+  service:
+    name: apache_exporter
+    state: "{{ apache_exporter_state }}"
+    enabled: "{{ apache_exporter_enabled }}"
+
+- name: Verify apache_exporter is responding to requests.
+  uri:
+    url: http://localhost:9117/
+    return_content: true
+  register: metrics_output
+  failed_when: "'Metrics' not in metrics_output.content"

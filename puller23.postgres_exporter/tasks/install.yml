@@ -1,0 +1,48 @@
+---
+- name: Create the postgres_exporter group
+  group:
+    name: "{{ postgres_exporter_system_group }}"
+    state: present
+    system: true
+  when: postgres_exporter_system_group != "root"
+
+- name: Create the postgres_exporter user
+  user:
+    name: "{{ postgres_exporter_system_user }}"
+    groups: "{{ postgres_exporter_system_group }}"
+    append: true
+    shell: /usr/sbin/nologin
+    create_home: false
+    home: /
+  when: postgres_exporter_system_user != "root"
+
+- block:
+    - name: Download postgres_exporter
+      become: false
+      get_url:
+        url: "{{ postgres_exporter_base_url }}/v{{ postgres_exporter_version }}/postgres_exporter-{{ postgres_exporter_version }}.linux-{{ go_architecture }}.tar.gz"
+        dest: "/tmp/postgres_exporter-{{ postgres_exporter_version }}.linux-{{ go_architecture }}.tar.gz"
+        checksum: "sha256:{{ postgres_exporter_checksum }}"
+        mode: '0644'
+      register: _r_download_binary
+      until: _r_download_binary is succeeded
+      retries: 5
+      delay: 2
+      delegate_to: localhost
+
+    - name: Unarchive postgres_exporter
+      become: false
+      unarchive:
+        src: "/tmp/postgres_exporter-{{ postgres_exporter_version }}.linux-{{ go_architecture }}.tar.gz"
+        #dest: "{{ _postgres_exporter_install_dir }}"
+        dest: "/tmp"
+        creates: "/tmp/postgres_exporter-{{ postgres_exporter_version }}.linux-{{ go_architecture }}/postgres_exporter"
+      delegate_to: localhost
+
+    - name: Propagate postgres_exporter
+      copy:
+        src: "/tmp/postgres_exporter-{{ postgres_exporter_version }}.linux-{{ go_architecture }}/postgres_exporter"
+        dest: "{{ _postgres_exporter_binary }}"
+        mode: 0755
+        owner: root
+        group: root

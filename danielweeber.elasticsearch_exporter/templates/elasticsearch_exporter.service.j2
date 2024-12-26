@@ -1,0 +1,10 @@
+[Unit]
+Description=ElasticsearchExporter
+
+[Service]
+TimeoutStartSec=0
+User=elasticsearch_exporter
+ExecStart={{ elasticsearch_exporter_bin_path }} {{ elasticsearch_exporter_options }}
+
+[Install]
+WantedBy=multi-user.target

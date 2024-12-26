@@ -1,0 +1,30 @@
+---
+# Check current preps
+- import_tasks: preflight.yml
+  tags:
+    - always
+
+# Set Parameters
+- name: Define redis_exporter_system_user
+  set_fact:
+    redis_exporter_system_user: "{{ _redis_exporter_system_user }}"
+  when: redis_exporter_system_user is not defined
+
+- name: Define redis_exporter_system_group
+  set_fact:
+    redis_exporter_system_group: "{{ _redis_exporter_system_group }}"
+  when: redis_exporter_system_group is not defined
+
+# Install redis_exporter
+- import_tasks: install.yml
+  become: true
+  when:
+    ( not _redis_exporter_is_installed.stat.exists ) or 
+    ( redis_exporter_install_dir | length > 0 )
+
+- import_tasks: configure.yml
+  become: true
+  tags:
+    - node_exporter_configure
+
+

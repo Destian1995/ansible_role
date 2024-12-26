@@ -1,0 +1,11 @@
+
+---
+argument_specs:
+  main:
+    short_description: Ensure DATA_SOURCE_NAME is set
+    options:
+      ct_postgres_exporter_env_data_source_name:
+        type: "string"
+        required: true
+        description: "Database connection string"
+...

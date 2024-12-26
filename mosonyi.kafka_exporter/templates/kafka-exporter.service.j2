@@ -1,0 +1,17 @@
+
+[Unit]
+Description=Kafka Exporter for Prometheus
+Wants=network-online.target kafka.service
+After=network-online.target kafka.service
+
+[Service]
+Type=simple
+User={{ user }}
+Group={{ group }}
+ExecReload=/bin/kill -HUP
+ExecStart=/usr/local/bin/kafka_exporter --kafka.server={% if kafka_bind_localhost == true %}localhost{% else %}{{ ansible_default_ipv4.address }}{% endif %}:{{ kafka_port }} --web.listen-address=:{{ exporter_port }}
+SyslogIdentifier=kafka-exporter
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

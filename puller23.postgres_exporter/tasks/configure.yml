@@ -1,0 +1,35 @@
+---
+- name: Copy the postgres_exporter systemd service file
+  template:
+    src: postgres_exporter.service.j2
+    dest: /etc/systemd/system/postgres_exporter.service
+    owner: root
+    group: root
+    mode: 0644
+  notify: restart postgres_exporter
+
+- block:
+    - name: Create postgres_exporter config dir
+      file:
+        path: "{{ postgres_exporter_config_dir }}"
+        state: directory
+        owner: "{{ postgres_exporter_system_user }}"
+        group: "{{ postgres_exporter_system_group }}"
+        mode: 0644
+      notify: restart postgres_exporter
+    - name: Copy the postgres_exporter config file
+      template:
+        src: postgres_exporter.env.j2
+        dest: "{{ postgres_exporter_config_dir }}/{{ postgres_exporter_env_file }}"
+        owner: "{{ postgres_exporter_system_user }}"
+        group: "{{ postgres_exporter_system_group }}"
+        mode: 0644
+      notify: restart postgres_exporter
+
+- name: Ensure postgres_exporter is enabled on boot
+  become: true
+  systemd:
+    daemon_reload: true
+    name: postgres_exporter
+    enabled: true
+    state: started

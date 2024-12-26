@@ -1,0 +1,21 @@
+---
+- name: Run simple versionscheck (optional)
+  ansible.builtin.include_tasks:
+    file: versioncheck.yml
+  when: submodules_versioncheck | bool
+
+- name: Install nginx exporter
+  ansible.builtin.import_tasks:
+    file: install.yml
+
+- name: Create nginx exporter config
+  ansible.builtin.import_tasks:
+    file: config.yml
+
+- name: Ensure nginx_exporter is started and enabled
+  become: true
+  ansible.builtin.systemd:
+    name: nginx_exporter
+    state: started
+    enabled: true
+    daemon_reload: true

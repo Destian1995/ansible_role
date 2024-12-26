@@ -1,0 +1,7 @@
+---
+- name: restart redis_exporter
+  become: true
+  systemd:
+    daemon_reload: true
+    name: redis_exporter
+    state: restarted
