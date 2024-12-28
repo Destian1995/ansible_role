@@ -1,0 +1,13 @@
+{
+  "service": {
+    "name": "node_exporter",
+    "tags": ["metrics", "exporter"],
+    "port": {{ node_exporter_port }},
+    "check": {
+      "http": "http://{{ ansible_default_ipv4.address }}:{{ node_exporter_port }}/metrics",
+      "interval": "30s",
+      "timeout": "5s"
+    }
+  }
+}
+

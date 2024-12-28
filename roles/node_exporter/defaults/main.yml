@@ -1,0 +1,19 @@
+---
+
+node_exporter_ver: "1.7.0"
+node_exporter_port: 9100
+node_exporter_package_repo:
+  "https://github.com/prometheus/node_exporter/releases/\
+   download/v{{ node_exporter_ver }}/node_exporter-{{ node_exporter_ver }}.linux-amd64.tar.gz"
+node_exporter_user: node_exporter
+node_exporter_group: node_exporter
+node_exporter_conf_dir: "/etc/node_exporter"
+node_exporter_bin_dir: "/opt/node_exporter"
+node_exporter_home_dir: "/var/lib/node_exporter"
+node_exporter_log_dir: "/var/log/node_exporter"
+node_exporter_artifacts_dir: "/opt/ansible/artifacts"
+node_exporter_conf_file: "{{ node_exporter_conf_dir }}/node_exporter.conf"
+node_exporter_binary: "{{ node_exporter_bin_dir }}/node_exporter"
+node_exporter_options:
+  - '--collector.systemd'
+  - '--collector.processes'
