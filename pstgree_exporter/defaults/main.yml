@@ -1,2 +1,12 @@
 ---
-# defaults file for postgree_exporter
+# file for postgres_exporter
+
+postgres_exporter_version: "0.16.0"
+postgres_exporter_user: "postgres_exporter"
+postgres_exporter_group: "postgres_exporter"
+postgres_exporter_port: 9187
+postgres_exporter_bin_dir: "/usr/local/bin"
+postgres_exporter_config_dir: "/etc/postgres_exporter"
+postgres_exporter_service_name: "postgres_exporter"
+postgres_exporter_data_source_name: "postgresql://user:password@localhost:5432/postgres?sslmode=disable"
+postgres_exporter_package_repo: "https://nexus.aton.ru/repository/raw-github/prometheus-community/postgres_exporter/releases/download/v{{ postgres_exporter_version }}/postgres_exporter-{{ ansible_system }}-{{ ansible_architecture }}"

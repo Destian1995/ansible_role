@@ -1,2 +1,9 @@
 ---
-# handlers file for postgree_exporter
+# handlers file for postgres_exporter
+- name: Restart postgres_exporter service
+  systemd:
+    daemon_reload: true
+    name: postgres_exporter
+    enabled: true
+    state: restarted
+  listen: Restart postgres_exporter service

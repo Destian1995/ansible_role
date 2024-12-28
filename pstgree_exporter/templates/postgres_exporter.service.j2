@@ -1,0 +1,16 @@
+[Unit]
+Description=Postgres Exporter
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+User={{ postgres_exporter_user }}
+Group={{ postgres_exporter_group }}
+Type=simple
+ExecStart={{ postgres_exporter_bin_dir }}/postgres_exporter --web.listen-address=0.0.0.0:{{ postgres_exporter_port }} --web.telemetry-path=/metrics --log.level=info
+Environment=DATA_SOURCE_NAME={{ postgres_exporter_data_source_name }}
+Restart=always
+SyslogIdentifier=postgres_exporter
+
+[Install]
+WantedBy=multi-user.target

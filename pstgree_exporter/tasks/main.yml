@@ -1,2 +1,42 @@
 ---
-# tasks file for postgree_exporter
+# tasks file for postgres_exporter
+- name: Ensure postgres_exporter user exists
+  ansible.builtin.user:
+    name: "{{ postgres_exporter_user }}"
+    group: "{{ postgres_exporter_group }}"
+    system: yes
+    shell: /sbin/nologin
+
+- name: Create directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ postgres_exporter_user }}"
+    group: "{{ postgres_exporter_group }}"
+    mode: '0755'
+  loop:
+    - "{{ postgres_exporter_config_dir }}"
+
+- name: Download postgres_exporter binary
+  ansible.builtin.get_url:
+    url: "https://github.com/prometheus-community/postgres_exporter/releases/download/v{{ postgres_exporter_version }}/postgres_exporter-{{ ansible_system }}-{{ ansible_architecture }}"
+    dest: "{{ postgres_exporter_bin_dir }}/postgres_exporter"
+    mode: '0755'
+
+- name: Create systemd service file
+  ansible.builtin.template:
+    src: postgres_exporter.service.j2
+    dest: "/etc/systemd/system/{{ postgres_exporter_service_name }}.service"
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Reload systemd daemon
+  ansible.builtin.systemd:
+    daemon_reload: true
+
+- name: Enable and start postgres_exporter service
+  ansible.builtin.systemd:
+    name: "{{ postgres_exporter_service_name }}"
+    enabled: true
+    state: started
