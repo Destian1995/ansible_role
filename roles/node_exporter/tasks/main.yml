@@ -26,10 +26,10 @@
 
 # Проверка, нужно ли устанавливать node_exporter через роль packages
 - name: Ensure node_exporter is installed
-  include_role:
+  ansible.builtin.include_role:
     name: packages
   vars:
-    github_url: "{{ node_exporter_url }}"       
+    packages_github_url: "{{ node_exporter_url }}"
     packages_github_list:
       - name: "{{ node_exporter_package_name }}"
         strip_components: 1

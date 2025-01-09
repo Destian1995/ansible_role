@@ -43,5 +43,5 @@ packages_github_url: "{{ github_url }}"
 packages_temp_dir: "/tmp/packages"
 
 # This field controls the number of components to strip when extracting GitHub packages
-package.strip_components: 0
+packages_strip_components: 0
 

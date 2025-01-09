@@ -1,10 +1,11 @@
 ---
 # roles/node_exporter/defaults/main.yml
 
-node_exporter_install: true #установка по-умолчанию
+node_exporter_install: true # установка по-умолчанию
 node_exporter_package_name: "node_exporter"
 node_exporter_version: "1.7.0"
-node_exporter_url: "https://github.com/prometheus/node_exporter/releases/download/v{{ node_exporter_version }}/node_exporter-{{ node_exporter_version }}.linux-amd64.tar.gz"
+node_exporter_url:
+   "https://github.com/prometheus/node_exporter/releases/download/v{{ node_exporter_version }}/node_exporter-{{ node_exporter_version }}.linux-amd64.tar.gz"
 node_exporter_conf_dir: "/etc/node_exporter"
 node_exporter_bin_dir: "/opt/node_exporter"
 node_exporter_home_dir: "/var/lib/node_exporter"
