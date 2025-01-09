@@ -24,14 +24,19 @@
   tags:
     - node_exporter
 
-- name: Copy node_exporter binary to correct directory
-  ansible.builtin.copy:
-    src: "/opt/node_exporter-{{ node_exporter_ver }}.linux-amd64/node_exporter"
-    dest: "{{ node_exporter_binary }}"
-    remote_src: true
-    mode: '0755'
-    owner: "{{ node_exporter_user }}"
-    group: "{{ node_exporter_group }}"
+# Проверка, нужно ли устанавливать node_exporter через роль packages
+- name: Ensure node_exporter is installed
+  include_role:
+    name: packages
+  vars:
+    github_url: "{{ node_exporter_url }}"       
+    packages_github_list:
+      - name: "{{ node_exporter_package_name }}"
+        strip_components: 1
+        tar_filename: "node_exporter-{{ node_exporter_version }}.linux-amd64.tar.gz"
+        version: "{{ node_exporter_version }}"
+    packages_install: "{{ node_exporter_install }}"  # Передаем флаг для установки
+  when: node_exporter_install
   tags:
     - node_exporter
 

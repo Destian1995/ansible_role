@@ -1,12 +1,47 @@
----
-# roles/packages/defaults/main.yml
+# Default values for packages role
 
-packages_node_exporter_ver: "1.7.0"
+# List of packages to be installed via apt
+packages_list: []
 
-packages_node_exporter_url: "https://github.com/prometheus/node_exporter/releases/download/v{{ node_exporter_ver }}/node_exporter"
-packages_nose_exporter_url: "-{{ node_exporter_ver }}.linux-amd64.tar.g>"
-packages_node_exporter_filename: "node_exporter-{{ node_exporter_ver }}.linux-amd64.tar.gz"
-packages_node_exporter_artifacts_dir: "/opt/node_exporter"
-packages_node_exporter_user: "node_exporter"
-packages_node_exporter_group: "node_exporter"
+# Options for apt package installation
+packages_apt_options:
+  state: "present"  # Default state is to install the packages
+  policy_rc_d: "{{ omit }}"  # Optional, to control whether apt should ask for confirmation
+  lock_timeout: "90"  # Timeout for apt to acquire a lock
+
+# List of .deb packages to install
+packages_deb_list: []
+
+# List of pip packages to install globally
+packages_pip_list: []
+
+# Extra arguments for pip packages installation
+packages_pip_extra_args: []
+
+# List of pip packages to install in a virtual environment
+packages_pip_virtualenv_list: []
+
+# Path to the virtual environment, used for pip installation in virtualenv
+packages_pip_virtualenv: "{{ omit }}"
+
+# Command to create the virtual environment (if needed)
+packages_pip_virtualenv_command: "{{ omit }}"
+
+# Python interpreter to use for creating the virtual environment
+packages_pip_virtualenv_python: "{{ omit }}"
+
+# Option to include site-packages in the virtual environment
+packages_pip_virtualenv_site_packages: "{{ omit }}"
+
+# List of packages to be downloaded from GitHub
+packages_github_list: []
+
+# URL Github
+packages_github_url: "{{ github_url }}"
+
+# Temporary directory to store downloaded GitHub packages
+packages_temp_dir: "/tmp/packages"
+
+# This field controls the number of components to strip when extracting GitHub packages
+package.strip_components: 0
 
