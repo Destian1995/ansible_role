@@ -40,7 +40,7 @@ packages_github_list: []
 packages_github_url: "{{ github_url }}"
 
 # Temporary directory to store downloaded GitHub packages
-packages_temp_dir: "/tmp/packages"
+packages_temp_dir: "{{ packages_bin_dir }}"
 
 # This field controls the number of components to strip when extracting GitHub packages
 packages_strip_components: 0

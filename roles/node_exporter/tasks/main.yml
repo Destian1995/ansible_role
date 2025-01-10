@@ -16,7 +16,7 @@
 
 - name: Create directory for node_exporter
   ansible.builtin.file:
-    path: "/opt/node_exporter"
+    path: "{{ node_exporter_bin_dir }}"
     state: directory
     mode: '0755'
     owner: root
@@ -30,6 +30,7 @@
     name: packages
   vars:
     packages_github_url: "{{ node_exporter_url }}"
+    packages_bin_dir: "{{ node_exporter_bin_dir }}"
     packages_github_list:
       - name: "{{ node_exporter_package_name }}"
         strip_components: 1
