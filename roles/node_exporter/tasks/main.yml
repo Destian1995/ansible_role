@@ -1,3 +1,4 @@
+
 - name: Create node_exporter group
   ansible.builtin.group:
     name: "{{ node_exporter_group }}"
@@ -33,7 +34,33 @@
     group: root
   tags:
     - node_exporter
+    
+- name: Ensure node_exporter user exists
+  ansible.builtin.user:
+    name: "{{ node_exporter_user }}"
+    state: present
+    shell: /sbin/nologin
+    create_home: true
 
+- name: Create artifacts directory
+  ansible.builtin.file:
+    path: "{{ node_exporter_artifacts_dir }}"
+    mode: '0755'
+    state: directory
+
+- name: Create node_exporter directories
+  ansible.builtin.file:
+    dest: "{{ item }}"
+    state: directory
+    owner: "{{ node_exporter_user }}"
+    group: "{{ node_exporter_group }}"
+    mode: '0755'
+  loop:
+    - "{{ node_exporter_conf_dir }}"
+    - "{{ node_exporter_bin_dir }}"
+    - "{{ node_exporter_home_dir }}"
+    - "{{ node_exporter_log_dir }}"
+    
 
 # Проверка, нужно ли устанавливать node_exporter через роль packages
 - name: Ensure node_exporter is installed
