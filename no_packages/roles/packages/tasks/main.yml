@@ -1,0 +1,59 @@
+# tasks/main.yml для роли packages
+
+- name: Create temp directory
+  ansible.builtin.file:
+    path: "{{ packages_temp_dir }}"
+    mode: '0755'  # Изменено на '0755' для корректного доступа к директории
+    state: directory
+  when: packages_github_list | length > 0
+
+- name: Download package from github
+  ansible.builtin.get_url:
+    url: "{{ packages_github_url }}"
+    dest: "{{ packages_temp_dir }}/{{ package.tar_filename }}"
+    timeout: 60
+    validate_certs: false
+    mode: '0640'
+  loop: "{{ packages_github_list | flatten }}"
+  loop_control:
+    loop_var: package
+    label: "{{ package.name }}"
+  when: packages_github_list | length > 0
+
+- name: Create github package directory
+  ansible.builtin.file:
+    path: "{{ packages_temp_dir }}/{{ package.name }}_{{ package.version }}"
+    mode: '0755'  # Изменено на '0755' для корректного доступа к директории
+    state: directory
+  loop: "{{ packages_github_list | flatten }}"
+  loop_control:
+    loop_var: package
+    label: "{{ package.name }}"
+  when: packages_github_list | length > 0
+
+- name: Extract github package
+  ansible.builtin.unarchive:
+    src: "{{ packages_temp_dir }}/{{ package.tar_filename }}"
+    dest: "{{ packages_temp_dir }}/{{ package.name }}_{{ package.version }}"
+    extra_opts:
+      - "--strip-components={{ package.strip_components | default(0) }}"
+    mode: '0644'
+    remote_src: true
+  loop: "{{ packages_github_list | flatten }}"
+  loop_control:
+    loop_var: package
+    label: "{{ package.name }}"
+  when: packages_github_list | length > 0
+
+- name: Copy github package binary to /usr/local/bin
+  ansible.builtin.copy:
+    src: "{{ packages_temp_dir }}/{{ package.name }}_{{ package.version }}/{{ package.name }}"
+    dest: "/usr/local/bin/"
+    mode: '0755'  # бинарный файл получает права 0755
+    remote_src: true
+  loop: "{{ packages_github_list | flatten }}"
+  loop_control:
+    loop_var: package
+    label: "{{ package.name }}"
+  when: packages_github_list | length > 0
+

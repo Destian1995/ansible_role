@@ -1,0 +1,24 @@
+{
+  "service": {
+    "name": "node_exporter",
+    "tags": [
+      "metrics",
+      "exporter",
+      "system:{{ node_meta.system | default('default_system') }}",
+      "environment:{{ node_meta.environment | default('default_environment') }}"
+    ],
+    "port": {{ node_exporter_port }},
+    "meta": {
+      "role": "{{ node_meta.role | default('default_role') }}",
+      "additional_role": "{{ node_meta.additional_role | default('default_additional_role') }}",
+      "system": "{{ node_meta.system | default('default_system') }}",
+      "environment": "{{ node_meta.environment | default('default_environment') }}"
+    },
+    "check": {
+      "http": "http://{{ ansible_default_ipv4.address }}:{{ node_exporter_port }}/metrics",
+      "interval": "30s",
+      "timeout": "5s"
+    }
+  }
+}
+

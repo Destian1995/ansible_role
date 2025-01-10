@@ -1,0 +1,14 @@
+---
+- name: Restart node_exporter service
+  ansible.builtin.systemd:
+    daemon_reload: true
+    name: node_exporter
+    enabled: true
+    state: restarted
+  listen: Restart node_exporter service
+
+- name: Reload Consul service
+  ansible.builtin.systemd:
+    name: consul
+    state: reloaded
+  listen: Reload Consul service
