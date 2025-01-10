@@ -64,6 +64,20 @@
   when: node_exporter_install
   tags:
     - node_exporter
+    
+- name: Reload systemd manager configuration
+  ansible.builtin.systemd:
+    daemon_reload: yes
+  tags:
+    - node_exporter
+
+- name: Restart node_exporter service
+  ansible.builtin.systemd:
+    name: node_exporter
+    enabled: true
+    state: restarted
+  tags:
+    - node_exporter
 
 - name: Configure systemd unit for node_exporter
   ansible.builtin.template:
