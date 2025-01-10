@@ -11,16 +11,40 @@
     group: "{{ node_exporter_group }}"
     state: present
     create_home: false
+    shell: /sbin/nologin
   tags:
     - node_exporter
 
-- name: Create directory for node_exporter
+- name: Ensure node_exporter bin directory exists
   ansible.builtin.file:
     path: "{{ node_exporter_bin_dir }}"
     state: directory
     mode: '0755'
-    owner: root
-    group: root
+    owner: "{{ node_exporter_user }}"
+    group: "{{ node_exporter_group }}"
+  tags:
+    - node_exporter
+
+- name: Create artifacts directory
+  ansible.builtin.file:
+    path: "{{ node_exporter_artifacts_dir }}"
+    mode: '0755'
+    state: directory
+  tags:
+    - node_exporter
+
+- name: Create node_exporter directories
+  ansible.builtin.file:
+    dest: "{{ item }}"
+    state: directory
+    owner: "{{ node_exporter_user }}"
+    group: "{{ node_exporter_group }}"
+    mode: '0755'
+  loop:
+    - "{{ node_exporter_conf_dir }}"
+    - "{{ node_exporter_bin_dir }}"
+    - "{{ node_exporter_home_dir }}"
+    - "{{ node_exporter_log_dir }}"
   tags:
     - node_exporter
 
@@ -38,6 +62,20 @@
         version: "{{ node_exporter_version }}"
     packages_install: "{{ node_exporter_install }}"  # Передаем флаг для установки
   when: node_exporter_install
+  tags:
+    - node_exporter
+    
+- name: Reload systemd manager configuration
+  ansible.builtin.systemd:
+    daemon_reload: yes
+  tags:
+    - node_exporter
+
+- name: Restart node_exporter service
+  ansible.builtin.systemd:
+    name: node_exporter
+    enabled: true
+    state: restarted
   tags:
     - node_exporter
 
@@ -80,12 +118,6 @@
   ansible.builtin.debug:
     var: role_meta
 
-- name: Debug role metadata
-  ansible.builtin.debug:
-    var: role_meta
-  tags:
-    - debug
-
 - name: Generate node_exporter.json with metadata
   ansible.builtin.template:
     src: "node_exporter.json.j2"
@@ -102,4 +134,3 @@
     state: restarted
   tags:
     - node_exporter
-
