@@ -1,5 +1,3 @@
-#roles/node_exporter/tasks/main.yml
-
 - name: Create node_exporter group
   ansible.builtin.group:
     name: "{{ node_exporter_group }}"
@@ -13,16 +11,7 @@
     group: "{{ node_exporter_group }}"
     state: present
     create_home: false
-  tags:
-    - node_exporter
-
-- name: Create directory for node_exporter
-  ansible.builtin.file:
-    path: "{{ node_exporter_bin_dir }}"
-    state: directory
-    mode: '0755'
-    owner: root
-    group: root
+    shell: /sbin/nologin
   tags:
     - node_exporter
 
@@ -31,23 +20,18 @@
     path: "{{ node_exporter_bin_dir }}"
     state: directory
     mode: '0755'
-    owner: root
-    group: root
+    owner: "{{ node_exporter_user }}"
+    group: "{{ node_exporter_group }}"
   tags:
     - node_exporter
-    
-- name: Ensure node_exporter user exists
-  ansible.builtin.user:
-    name: "{{ node_exporter_user }}"
-    state: present
-    shell: /sbin/nologin
-    create_home: true
 
 - name: Create artifacts directory
   ansible.builtin.file:
     path: "{{ node_exporter_artifacts_dir }}"
     mode: '0755'
     state: directory
+  tags:
+    - node_exporter
 
 - name: Create node_exporter directories
   ansible.builtin.file:
@@ -61,7 +45,8 @@
     - "{{ node_exporter_bin_dir }}"
     - "{{ node_exporter_home_dir }}"
     - "{{ node_exporter_log_dir }}"
-    
+  tags:
+    - node_exporter
 
 # Проверка, нужно ли устанавливать node_exporter через роль packages
 - name: Ensure node_exporter is installed
@@ -119,12 +104,6 @@
   ansible.builtin.debug:
     var: role_meta
 
-- name: Debug role metadata
-  ansible.builtin.debug:
-    var: role_meta
-  tags:
-    - debug
-
 - name: Generate node_exporter.json with metadata
   ansible.builtin.template:
     src: "node_exporter.json.j2"
@@ -141,4 +120,3 @@
     state: restarted
   tags:
     - node_exporter
-
