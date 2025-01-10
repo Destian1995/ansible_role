@@ -24,6 +24,17 @@
   tags:
     - node_exporter
 
+- name: Ensure node_exporter bin directory exists
+  ansible.builtin.file:
+    path: "{{ node_exporter_bin_dir }}"
+    state: directory
+    mode: '0755'
+    owner: root
+    group: root
+  tags:
+    - node_exporter
+
+
 # Проверка, нужно ли устанавливать node_exporter через роль packages
 - name: Ensure node_exporter is installed
   ansible.builtin.include_role:
