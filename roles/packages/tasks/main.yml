@@ -1,9 +1,7 @@
-# tasks/main.yml для роли packages
-
 - name: Create temp directory
   ansible.builtin.file:
     path: "{{ packages_temp_dir }}"
-    mode: '0640'
+    mode: '0755'
     state: directory
   when: packages_github_list | length > 0
 
@@ -23,7 +21,7 @@
 - name: Create github package directory
   ansible.builtin.file:
     path: "{{ packages_temp_dir }}/{{ package.name }}_{{ package.version }}"
-    mode: '0640'
+    mode: '0755'
     state: directory
   loop: "{{ packages_github_list | flatten }}"
   loop_control:
@@ -56,4 +54,3 @@
     loop_var: package
     label: "{{ package.name }}"
   when: packages_github_list | length > 0
-

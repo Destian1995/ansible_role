@@ -1,0 +1,50 @@
+# roles/blackbox_exporter/templates/blackbox.yml.j2
+modules:
+  http_2xx:
+    prober: http
+    timeout: 5s
+    http:
+      method: GET
+      valid_status_codes: [200, 201, 202, 204, 301, 302, 303, 307, 308]
+      headers:
+        Host: "{{ ansible_host | default('localhost') }}"
+      no_follow_redirects: false
+      fail_if_ssl: false
+      fail_if_not_ssl: false
+      preferred_ip_protocol: ip4
+      ip_protocol_fallback: true
+
+  http_post_2xx:
+    prober: http
+    timeout: 5s
+    http:
+      method: POST
+      valid_status_codes: [200, 201, 202, 204, 301, 302, 303, 307, 308]
+      headers:
+        Host: "{{ ansible_host | default('localhost') }}"
+        Content-Type: application/json
+      
+
+  icmp:
+    prober: icmp
+    timeout: 5s
+    icmp:
+      preferred_ip_protocol: ip4
+      ip_protocol_fallback: true
+
+  tcp_connect:
+    prober: tcp
+    timeout: 5s
+    tcp:
+      preferred_ip_protocol: ip4
+      ip_protocol_fallback: true
+
+  dns_lookup:
+    prober: dns
+    timeout: 5s
+    dns:
+      query_name: "{{ dns_query_name | default(ansible_host) }}"
+      query_type: A
+      valid_rcodes: ['NOERROR']
+      preferred_ip_protocol: ip4
+      ip_protocol_fallback: true

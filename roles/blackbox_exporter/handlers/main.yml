@@ -1,0 +1,27 @@
+# roles/blackbox_exporter/handlers/main.yml
+
+---
+- name: Restart blackbox_exporter
+  ansible.builtin.systemd:
+    name: blackbox_exporter
+    state: restarted
+  become: true
+
+- name: Reload systemd daemon and restart blackbox_exporter
+  block:
+    - name: Reload systemd daemon
+      ansible.builtin.systemd:
+        daemon_reload: true
+      become: true
+
+    - name: Restart blackbox_exporter
+      ansible.builtin.systemd:
+        name: blackbox_exporter
+        state: restarted
+      become: true
+
+- name: Restart Consul
+  ansible.builtin.systemd:
+    name: consul
+    state: restarted
+  become: true
