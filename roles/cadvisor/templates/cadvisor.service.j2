@@ -1,0 +1,12 @@
+[Unit]
+Description=cAdvisor
+After=network.target
+
+[Service]
+User={{ cadvisor_user }}
+Group={{ cadvisor_group }}
+ExecStart={{ cadvisor_bin_path }} -port={{ cadvisor_listen_port }} {{ cadvisor_args }} > {{ cadvisor_log_file }} 2>&1
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

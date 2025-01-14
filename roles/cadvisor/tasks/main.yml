@@ -1,0 +1,58 @@
+---
+- name: Ensure required packages are installed
+  ansible.builtin.package:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - wget
+    - systemd
+
+- name: Download cAdvisor binary
+  ansible.builtin.get_url:
+    url: "{{ cadvisor_repo }}"
+    dest: "{{ cadvisor_bin_path }}"
+    mode: '0755'
+
+- name: Create user for cAdvisor if not exists
+  ansible.builtin.user:
+    name: "{{ cadvisor_user }}"
+    group: "{{ cadvisor_group }}"
+    state: present
+
+- name: Ensure log directory exists
+  ansible.builtin.file:
+    path: "/var/log/"
+    state: directory
+    owner: "{{ cadvisor_user }}"
+    group: "{{ cadvisor_group }}"
+    mode: '0755'
+
+- name: Copy service file
+  ansible.builtin.template:
+    src: cadvisor.service.j2
+    dest: "/etc/systemd/system/{{ cadvisor_service_name }}.service"
+    mode: '0644'
+
+- name: Reload systemd daemon to recognize new service
+  ansible.builtin.systemd:
+    daemon_reload: true
+
+- name: Enable and start cAdvisor service
+  ansible.builtin.systemd:
+    name: "{{ cadvisor_service_name }}"
+    enabled: true
+    state: started
+
+- name: Ensure Consul configuration directory exists
+  ansible.builtin.file:
+    path: "/etc/consul.d/"
+    state: directory
+    mode: '0755'
+
+- name: Copy Consul configuration file for cAdvisor
+  ansible.builtin.template:
+    src: cadvisor-consul.json.j2
+    dest: "/etc/consul.d/cadvisor.json"
+    mode: '0644'
+  notify:
+    - Reload Consul

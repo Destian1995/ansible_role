@@ -1,0 +1,18 @@
+{
+  "service": {
+    "name": "cadvisor",
+    "tags": [
+      "metrics",
+      "exporter",
+      "container_monitoring"
+    ],
+    "port": {{ cadvisor_listen_port }},
+    "address": "{{ ansible_host }}",
+    "checks": [
+      {
+        "http": "http://localhost:{{ cadvisor_listen_port }}/metrics",
+        "interval": "10s"
+      }
+    ]
+  }
+}
