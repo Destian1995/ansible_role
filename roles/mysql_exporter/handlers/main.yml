@@ -1,0 +1,12 @@
+---
+- name: restart mysql_exporter
+  ansible.builtin.systemd:
+    name: mysql_exporter
+    state: restarted
+    enabled: true
+
+- name: restart consul
+  ansible.builtin.systemd:
+    name: consul
+    state: restarted
+    enabled: true

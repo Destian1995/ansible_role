@@ -1,0 +1,19 @@
+{
+  "service": {
+    "name": "mysql_exporter",
+    "tags": [
+      "metrics",
+      "exporter",
+      "database",
+      "name_system:{{ hostvars[inventory_hostname]['name_system'] | default('unknown') }}"
+    ],
+    "port": 9104,
+    "address": "{{ ansible_host }}",
+    "checks": [
+      {
+        "http": "http://localhost:9104/metrics",
+        "interval": "10s"
+      }
+    ]
+  }
+}

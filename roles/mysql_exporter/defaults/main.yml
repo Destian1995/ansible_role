@@ -1,0 +1,21 @@
+# Параметры установки mysql_exporter
+mysql_exporter_version: "0.14.0"
+mysql_exporter_arch: "linux-amd64"
+mysql_exporter_download_url: "{{ mysql_exporter_git_repo }}/prometheus/mysqld_exporter/releases/download/v{{ mysql_exporter_version }}/mysqld_exporter-{{ mysql_exporter_version }}.{{ mysql_exporter_arch }}.tar.gz"
+mysql_exporter_git_repo: "https://github.com"
+
+# Путь к директории установки
+mysql_exporter_install_dir: "/usr/local/bin"
+
+# Пользователь и группа для запуска mysql_exporter
+mysql_exporter_user: "mysql_exporter"
+mysql_exporter_group: "mysql_exporter"
+
+# Настройки подключения к MySQL
+mysql_exporter_mysql_host: "localhost"
+mysql_exporter_mysql_port: "3306"
+mysql_exporter_mysql_user: "exporter"
+mysql_exporter_mysql_password: "password"
+
+# Дополнительные параметры запуска
+mysql_exporter_extra_args: ""

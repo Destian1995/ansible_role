@@ -1,0 +1,74 @@
+---
+- name: Ensure mysql_exporter user and group exist
+  ansible.builtin.group:
+    name: "{{ mysql_exporter_group }}"
+    state: present
+
+- name: Ensure mysql_exporter user exists
+  ansible.builtin.user:
+    name: "{{ mysql_exporter_user }}"
+    groups: "{{ mysql_exporter_group }}"
+    shell: /sbin/nologin
+    state: present
+
+- name: Download mysql_exporter binary
+  ansible.builtin.get_url:
+    url: "{{ mysql_exporter_download_url }}"
+    dest: "/tmp/mysqld_exporter.tar.gz"
+    mode: '0644'
+
+- name: Unarchive mysql_exporter binary
+  ansible.builtin.unarchive:
+    src: "/tmp/mysqld_exporter.tar.gz"
+    dest: "/tmp"
+    remote_src: true
+
+- name: Create directory for MySQL configuration
+  ansible.builtin.file:
+    path: "/etc/mysql_exporter"
+    state: directory
+    owner: "{{ mysql_exporter_user }}"
+    group: "{{ mysql_exporter_group }}"
+    mode: '0755'
+
+- name: Move mysql_exporter binary to install directory
+  ansible.builtin.copy:
+    src: "/tmp/mysqld_exporter-{{ mysql_exporter_version }}.{{ mysql_exporter_arch }}/mysqld_exporter"
+    dest: "{{ mysql_exporter_install_dir }}/mysqld_exporter"
+    owner: "{{ mysql_exporter_user }}"
+    group: "{{ mysql_exporter_group }}"
+    mode: '0755'
+    remote_src: true
+  notify: restart mysql_exporter
+
+- name: Clean up downloaded files
+  ansible.builtin.file:
+    path: "/tmp/mysqld_exporter.tar.gz"
+    state: absent
+
+- name: Create systemd service file for mysql_exporter
+  ansible.builtin.template:
+    src: "mysql_exporter.service.j2"
+    dest: "/etc/systemd/system/mysql_exporter.service"
+    owner: root
+    group: root
+    mode: '0644'
+  notify: restart mysql_exporter
+
+- name: Copy MySQL configuration file for mysql_exporter
+  ansible.builtin.copy:
+    src: "files/my.cnf"
+    dest: "/etc/mysql_exporter/.my.cnf"
+    owner: "{{ mysql_exporter_user }}"
+    group: "{{ mysql_exporter_group }}"
+    mode: '0600'
+  notify: restart mysql_exporter
+
+- name: Copy Consul configuration file for mysql_exporter
+  ansible.builtin.template:
+    src: "templates/mysql_exporter_consul.json"
+    dest: "/etc/consul.d/mysql_exporter.json"
+    owner: root
+    group: root
+    mode: '0644'
+  notify: restart consul

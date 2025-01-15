@@ -1,0 +1,27 @@
+---
+galaxy_info:
+  role_name: mysql_exporter
+  author: Vladislav Chernyak
+  description: Install and configure MySQL Exporter
+  company: Aton
+  license: MIT
+  min_ansible_version: 2.9
+
+  platforms:
+    - name: Debian
+      versions:
+        - buster
+        - bullseye
+    - name: Ubuntu
+      versions:
+        - focal
+        - jammy
+    - name: CentOS
+      versions:
+        - 7
+        - 8
+    - name: Rocky
+      versions:
+        - 8
+
+dependencies: []

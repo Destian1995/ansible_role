@@ -1,0 +1,14 @@
+[Unit]
+Description=MySQL Exporter
+After=network.target
+
+[Service]
+User={{ mysql_exporter_user }}
+Group={{ mysql_exporter_group }}
+Type=simple
+ExecStart={{ mysql_exporter_install_dir }}/mysqld_exporter \
+  --config.my-cnf=/etc/mysql_exporter/.my.cnf \
+  {{ mysql_exporter_extra_args }}
+
+[Install]
+WantedBy=multi-user.target
