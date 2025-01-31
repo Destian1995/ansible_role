@@ -4,8 +4,8 @@
     "tags": [
       "metrics",
       "exporter",
-      "database",
-      "name_system:{{ hostvars[inventory_hostname]['name_system'] | default('unknown') }}"
+      "mysql_exporter",
+      "system_name:{{ hostvars[inventory_hostname]['system_name'] | default('unknown') }}"
     ],
     "port": 9104,
     "address": "{{ ansible_host }}",
